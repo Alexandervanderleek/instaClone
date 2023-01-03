@@ -2,6 +2,7 @@ import React from 'react'
 import Stories from './Stories'
 import Posts from './Posts'
 import MiniProfile from './MiniProfile'
+import Suggestion from './Suggestion'
 export default function Feed() {
   return (
     <main className='grid gird-cols-1 md:grid-cols-3 md:max-w-6xl mx-auto'>
@@ -19,6 +20,8 @@ export default function Feed() {
               <MiniProfile></MiniProfile>
 
               {/* Suggestion */}
+
+              <Suggestion></Suggestion>
             </div>
         </section>
     </main>
