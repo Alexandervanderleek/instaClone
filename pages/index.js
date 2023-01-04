@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Header from '../components/Header'
 import Feed from '../components/Feed'
+import UploadModel from '../components/UploadModel'
 
 export default function Home() {
   return (
@@ -20,6 +21,8 @@ export default function Home() {
       <Feed></Feed>
 
       {/* Modal Section */}
+
+      <UploadModel></UploadModel>
 
 
     </div>
