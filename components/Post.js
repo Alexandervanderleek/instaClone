@@ -1,22 +1,51 @@
 import React, {useEffect, useState} from 'react'
 import { EllipsisHorizontalIcon  } from '@heroicons/react/24/solid'
 import {HeartIcon, BookmarkIcon, ChatBubbleBottomCenterIcon, FaceSmileIcon } from '@heroicons/react/24/outline'
+import {HeartIcon as HeartIconFilled} from "@heroicons/react/24/solid"
 import { useSession} from "next-auth/react";
-import { addDoc, serverTimestamp, collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { addDoc, serverTimestamp, collection, onSnapshot, query, orderBy, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import {db} from '../firebase'
 import Moment from 'react-moment';
+import { async } from '@firebase/util';
 
 
 export default function Post({img, userImg, caption, username, id}) {
   const {data: session} = useSession();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [likes, setLikes] = useState([]);
+
   useEffect(()=>{
-    console.log(id)
     const unsubscribe = onSnapshot(
       query(collection(db, "posts/"+id+"/comments"), orderBy("timeStamp", "desc")), (snapshot) => {setComments(snapshot.docs)}
     )
   }, [db, id])
+
+  useEffect(()=>{
+    const unsubscribe = onSnapshot(
+      collection(db, "posts", id, "likes"), (snapshot) => setLikes(snapshot.docs)
+    );
+
+  }, [db])
+
+  useEffect(()=>{
+    setHasLiked(
+      likes.findIndex(like=>like.id === session?.user.uid) !== -1
+    )
+    console.log(hasLiked)
+  },[likes])
+
+  async function heartClick(){
+    if(hasLiked){
+      await deleteDoc(doc(db, "posts", id, "likes", session.user.uid))
+    }else{
+      await setDoc(doc(db, "posts", id, "likes", session.user.uid), {
+        username: session.user.username,
+      })
+    }
+    
+  }
 
 
   async function sendComment(event){
@@ -45,7 +74,12 @@ export default function Post({img, userImg, caption, username, id}) {
     {session && (
       <div className="flex justify-between px-4 pt-4">
       <div className="flex space-x-4">
-          <HeartIcon className='btn'></HeartIcon>
+        {hasLiked ? (
+           <HeartIconFilled onClick={heartClick} className='btn text-red-500'></HeartIconFilled>
+        ):(<HeartIcon onClick={heartClick} className='btn'></HeartIcon>)}
+         
+          
+          
           <ChatBubbleBottomCenterIcon className='btn'></ChatBubbleBottomCenterIcon>
       </div>
       <BookmarkIcon className='btn'></BookmarkIcon>
